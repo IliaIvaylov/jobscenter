@@ -3,8 +3,8 @@ game 'gta5'
 
 name 'jobs'
 author 'IliaIvaylov'
-description 'ESX Job Manager - Manage Jobs Easily from In-Game!'
-version '1.0.0'
+description 'ESX Job Manager - Manage Jobs Easily from In-Game! + VIP Menu System'
+version '1.1.0'
 
 shared_scripts {
     '@es_extended/imports.lua',

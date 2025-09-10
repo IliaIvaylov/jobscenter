@@ -268,13 +268,13 @@ end
 -- Check if player has VIP access
 function HasVipAccess(identifier)
     local result = MySQL.Sync.fetchAll('SELECT * FROM vip_players WHERE identifier = ? AND is_vip = 1', {identifier})
-    return #result > 0
+    return result and #result > 0
 end
 
 -- Check if player has claimed a specific reward
 function HasClaimedReward(identifier, rewardType)
     local result = MySQL.Sync.fetchAll('SELECT * FROM vip_claims WHERE identifier = ? AND reward_type = ?', {identifier, rewardType})
-    return #result > 0
+    return result and #result > 0
 end
 
 -- Give money to player
@@ -296,12 +296,23 @@ function GiveWeapon(src, weapon, ammo)
     if not player then return false end
     
     if Framework == 'ESX' then
-        player.addWeapon(weapon, ammo)
+        player.addWeapon(weapon, ammo or 0)
     elseif Framework == 'QBCore' then
-        player.Functions.AddItem(weapon, 1)
-        if ammo and ammo > 0 then
-            player.Functions.AddItem('pistol_ammo', ammo) -- Adjust ammo type as needed
+        -- For QBCore, we need to use the proper item system
+        local hasWeapon = player.Functions.AddItem(weapon:lower(), 1)
+        if hasWeapon and ammo and ammo > 0 then
+            -- Add appropriate ammo based on weapon type
+            local ammoType = 'pistol_ammo' -- Default, could be made configurable
+            if weapon:find('RIFLE') then
+                ammoType = 'rifle_ammo'
+            elseif weapon:find('SMG') then
+                ammoType = 'smg_ammo'
+            elseif weapon:find('SHOTGUN') then
+                ammoType = 'shotgun_ammo'
+            end
+            player.Functions.AddItem(ammoType, ammo)
         end
+        return hasWeapon
     end
     return true
 end
@@ -397,6 +408,18 @@ RegisterNetEvent('vip-menu:claimReward', function(rewardType)
     local src = source
     local identifier = GetPlayerIdentifier(src)
     
+    -- Validate reward type
+    if not rewardType or type(rewardType) ~= 'string' then
+        TriggerClientEvent('vip-menu:showNotification', src, 'Invalid reward type!', 'error')
+        return
+    end
+    
+    -- Check if reward type is valid
+    if not VipConfig.Rewards[rewardType] then
+        TriggerClientEvent('vip-menu:showNotification', src, 'Invalid reward type!', 'error')
+        return
+    end
+    
     if not identifier then
         TriggerClientEvent('vip-menu:showNotification', src, VipConfig.Notifications.invalidPlayer, 'error')
         return
@@ -439,10 +462,14 @@ RegisterNetEvent('vip-menu:claimReward', function(rewardType)
             identifier,
             rewardType,
             json.encode(rewardData)
-        })
-        
-        TriggerClientEvent('vip-menu:showNotification', src, VipConfig.Notifications.rewardClaimed, 'success')
-        TriggerClientEvent('vip-menu:rewardClaimed', src, rewardType)
+        }, function(affectedRows)
+            if affectedRows and affectedRows > 0 then
+                TriggerClientEvent('vip-menu:showNotification', src, VipConfig.Notifications.rewardClaimed, 'success')
+                TriggerClientEvent('vip-menu:rewardClaimed', src, rewardType)
+            else
+                print('Warning: Failed to record VIP claim for player ' .. src)
+            end
+        end)
     else
         TriggerClientEvent('vip-menu:showNotification', src, 'Failed to give reward!', 'error')
     end
