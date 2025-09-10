@@ -109,6 +109,12 @@ The VIP menu features a modern gradient design with:
 - Clear visual feedback for claimed rewards
 - Responsive design for different screen sizes
 
+![VIP Menu Preview](html/assets/vip-menu-preview.png)
+*VIP Menu with available rewards*
+
+![VIP Menu Claimed State](html/assets/vip-menu-claimed-state.png)
+*VIP Menu showing claimed rewards*
+
 ## Commands
 
 | Command | Description | Permission |
