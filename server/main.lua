@@ -1,5 +1,22 @@
 ESX = exports["es_extended"]:getSharedObject()
 
+-- Framework Detection
+local QBCore = nil
+local Framework = 'ESX'
+
+-- Try to detect QBCore
+pcall(function()
+    QBCore = exports['qb-core']:GetCoreObject()
+    if QBCore then
+        Framework = 'QBCore'
+        print('VIP Menu: QBCore framework detected')
+    end
+end)
+
+if Framework == 'ESX' then
+    print('VIP Menu: ESX framework detected')
+end
+
 -- Datos en memoria
 local jobsData = {
     jobs = {},
@@ -205,3 +222,274 @@ AddEventHandler('onResourceStart', function(resourceName)
         print('Jobs resource started successfully')
     end
 end)
+
+-- VIP MENU SYSTEM FUNCTIONS
+
+-- Get player object based on framework
+function GetPlayer(src)
+    if Framework == 'ESX' then
+        return ESX.GetPlayerFromId(src)
+    elseif Framework == 'QBCore' then
+        return QBCore.Functions.GetPlayer(src)
+    end
+    return nil
+end
+
+-- Get player identifier
+function GetPlayerIdentifier(src)
+    local player = GetPlayer(src)
+    if Framework == 'ESX' then
+        return player and player.identifier or nil
+    elseif Framework == 'QBCore' then
+        return player and player.PlayerData.citizenid or nil
+    end
+    return nil
+end
+
+-- Check if player is admin
+function IsPlayerAdmin(src)
+    local player = GetPlayer(src)
+    if not player then return false end
+    
+    if Framework == 'ESX' then
+        local group = player.getGroup()
+        for _, adminGroup in pairs(VipConfig.AdminGroups) do
+            if group == adminGroup then return true end
+        end
+    elseif Framework == 'QBCore' then
+        local perms = QBCore.Functions.GetPermission(src)
+        for _, adminGroup in pairs(VipConfig.AdminGroups) do
+            if perms[adminGroup] then return true end
+        end
+    end
+    return false
+end
+
+-- Check if player has VIP access
+function HasVipAccess(identifier)
+    local result = MySQL.Sync.fetchAll('SELECT * FROM vip_players WHERE identifier = ? AND is_vip = 1', {identifier})
+    return #result > 0
+end
+
+-- Check if player has claimed a specific reward
+function HasClaimedReward(identifier, rewardType)
+    local result = MySQL.Sync.fetchAll('SELECT * FROM vip_claims WHERE identifier = ? AND reward_type = ?', {identifier, rewardType})
+    return #result > 0
+end
+
+-- Give money to player
+function GiveMoney(src, amount)
+    local player = GetPlayer(src)
+    if not player then return false end
+    
+    if Framework == 'ESX' then
+        player.addMoney(amount)
+    elseif Framework == 'QBCore' then
+        player.Functions.AddMoney('cash', amount)
+    end
+    return true
+end
+
+-- Give weapon to player
+function GiveWeapon(src, weapon, ammo)
+    local player = GetPlayer(src)
+    if not player then return false end
+    
+    if Framework == 'ESX' then
+        player.addWeapon(weapon, ammo)
+    elseif Framework == 'QBCore' then
+        player.Functions.AddItem(weapon, 1)
+        if ammo and ammo > 0 then
+            player.Functions.AddItem('pistol_ammo', ammo) -- Adjust ammo type as needed
+        end
+    end
+    return true
+end
+
+-- Give vehicle to player
+function GiveVehicle(src, model, plate)
+    local player = GetPlayer(src)
+    if not player then return false end
+    
+    local identifier = GetPlayerIdentifier(src)
+    if not identifier then return false end
+    
+    local finalPlate = plate .. math.random(100, 999)
+    
+    -- For ESX, add to owned_vehicles table
+    if Framework == 'ESX' then
+        local vehicleProps = {
+            model = GetHashKey(model),
+            plate = finalPlate,
+            bodyHealth = 1000,
+            engineHealth = 1000,
+            tankHealth = 1000,
+            fuelLevel = 100
+        }
+        
+        MySQL.Async.execute('INSERT INTO owned_vehicles (owner, plate, vehicle) VALUES (?, ?, ?)', {
+            identifier,
+            finalPlate,
+            json.encode(vehicleProps)
+        })
+    elseif Framework == 'QBCore' then
+        -- For QBCore, add to player_vehicles table
+        local vehicleProps = {
+            model = model,
+            plate = finalPlate,
+            garage = 'pillboxgarage',
+            fuel = 100,
+            engine = 1000,
+            body = 1000,
+            state = 1
+        }
+        
+        MySQL.Async.execute('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, garage, state) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', {
+            'license:' .. GetPlayerIdentifiers(src)[1],
+            identifier,
+            model,
+            GetHashKey(model),
+            json.encode(vehicleProps),
+            finalPlate,
+            'pillboxgarage',
+            1
+        })
+    end
+    
+    return true
+end
+
+-- VIP EVENTS
+
+-- Request VIP menu data
+RegisterNetEvent('vip-menu:requestData', function()
+    local src = source
+    local identifier = GetPlayerIdentifier(src)
+    
+    if not identifier then
+        TriggerClientEvent('vip-menu:showNotification', src, VipConfig.Notifications.invalidPlayer, 'error')
+        return
+    end
+    
+    local hasVip = HasVipAccess(identifier)
+    if not hasVip then
+        TriggerClientEvent('vip-menu:showNotification', src, VipConfig.Notifications.noAccess, 'error')
+        return
+    end
+    
+    -- Get claimed rewards
+    local claimedRewards = {}
+    for rewardType, _ in pairs(VipConfig.Rewards) do
+        claimedRewards[rewardType] = HasClaimedReward(identifier, rewardType)
+    end
+    
+    local data = {
+        rewards = VipConfig.Rewards,
+        claimed = claimedRewards,
+        ui = VipConfig.UI
+    }
+    
+    TriggerClientEvent('vip-menu:receiveData', src, data)
+end)
+
+-- Claim VIP reward
+RegisterNetEvent('vip-menu:claimReward', function(rewardType)
+    local src = source
+    local identifier = GetPlayerIdentifier(src)
+    
+    if not identifier then
+        TriggerClientEvent('vip-menu:showNotification', src, VipConfig.Notifications.invalidPlayer, 'error')
+        return
+    end
+    
+    local hasVip = HasVipAccess(identifier)
+    if not hasVip then
+        TriggerClientEvent('vip-menu:showNotification', src, VipConfig.Notifications.noAccess, 'error')
+        return
+    end
+    
+    if HasClaimedReward(identifier, rewardType) then
+        TriggerClientEvent('vip-menu:showNotification', src, VipConfig.Notifications.alreadyClaimed, 'error')
+        return
+    end
+    
+    local reward = VipConfig.Rewards[rewardType]
+    if not reward or not reward.enabled then
+        TriggerClientEvent('vip-menu:showNotification', src, 'This reward is not available!', 'error')
+        return
+    end
+    
+    local success = false
+    local rewardData = {}
+    
+    if rewardType == 'money' then
+        success = GiveMoney(src, reward.amount)
+        rewardData = {amount = reward.amount}
+    elseif rewardType == 'weapon' then
+        success = GiveWeapon(src, reward.name, reward.ammo)
+        rewardData = {weapon = reward.name, ammo = reward.ammo}
+    elseif rewardType == 'vehicle' then
+        success = GiveVehicle(src, reward.model, reward.plate)
+        rewardData = {model = reward.model, plate = reward.plate}
+    end
+    
+    if success then
+        -- Record the claim
+        MySQL.Async.execute('INSERT INTO vip_claims (identifier, reward_type, reward_data) VALUES (?, ?, ?)', {
+            identifier,
+            rewardType,
+            json.encode(rewardData)
+        })
+        
+        TriggerClientEvent('vip-menu:showNotification', src, VipConfig.Notifications.rewardClaimed, 'success')
+        TriggerClientEvent('vip-menu:rewardClaimed', src, rewardType)
+    else
+        TriggerClientEvent('vip-menu:showNotification', src, 'Failed to give reward!', 'error')
+    end
+end)
+
+-- Give VIP access command
+RegisterCommand(VipConfig.Commands.giveVip, function(source, args, rawCommand)
+    local src = source
+    
+    if not IsPlayerAdmin(src) then
+        TriggerClientEvent('vip-menu:showNotification', src, VipConfig.Notifications.noPermission, 'error')
+        return
+    end
+    
+    if not args[1] then
+        TriggerClientEvent('vip-menu:showNotification', src, 'Usage: /' .. VipConfig.Commands.giveVip .. ' [playerID]', 'error')
+        return
+    end
+    
+    local targetId = tonumber(args[1])
+    local targetPlayer = GetPlayer(targetId)
+    
+    if not targetPlayer then
+        TriggerClientEvent('vip-menu:showNotification', src, VipConfig.Notifications.invalidPlayer, 'error')
+        return
+    end
+    
+    local targetIdentifier = GetPlayerIdentifier(targetId)
+    local adminIdentifier = GetPlayerIdentifier(src)
+    
+    -- Check if player already has VIP
+    if HasVipAccess(targetIdentifier) then
+        TriggerClientEvent('vip-menu:showNotification', src, 'Player already has VIP access!', 'error')
+        return
+    end
+    
+    -- Grant VIP access
+    MySQL.Async.execute('INSERT INTO vip_players (identifier, granted_by) VALUES (?, ?) ON DUPLICATE KEY UPDATE is_vip = 1, granted_by = ?, granted_at = NOW()', {
+        targetIdentifier,
+        adminIdentifier,
+        adminIdentifier
+    }, function(affectedRows)
+        if affectedRows > 0 then
+            TriggerClientEvent('vip-menu:showNotification', src, VipConfig.Notifications.vipGranted, 'success')
+            TriggerClientEvent('vip-menu:showNotification', targetId, 'You have been granted VIP access!', 'success')
+        else
+            TriggerClientEvent('vip-menu:showNotification', src, 'Failed to grant VIP access!', 'error')
+        end
+    end)
+end, false)

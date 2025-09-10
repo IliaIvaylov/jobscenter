@@ -272,3 +272,81 @@
     <script src="script.js"></script>
 </body>
 </html>
+
+<!-- VIP Menu -->
+<div id="vipApp" class="hidden vip-container">
+    <div class="vip-menu">
+        <!-- Header -->
+        <div class="vip-header">
+            <div class="vip-logo">
+                <img src="https://cdn-icons-png.flaticon.com/512/2922/2922506.png" alt="VIP" class="palm-tree-logo">
+                <div class="vip-title">
+                    <h1>VIP REWARDS</h1>
+                    <p>Exclusive rewards for VIP members</p>
+                </div>
+            </div>
+            <button id="closeVipBtn" class="vip-close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Rewards Grid -->
+        <div class="vip-rewards-grid">
+            <!-- Money Reward -->
+            <div class="vip-reward-card" data-reward="money">
+                <div class="reward-icon money-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="reward-content">
+                    <h3 id="moneyRewardLabel">$50,000 Cash</h3>
+                    <p>Instant cash reward</p>
+                    <button class="claim-btn" data-reward="money">
+                        <i class="fas fa-gift"></i> Claim Reward
+                    </button>
+                    <div class="claimed-badge hidden">
+                        <i class="fas fa-check"></i> Claimed
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weapon Reward -->
+            <div class="vip-reward-card" data-reward="weapon">
+                <div class="reward-icon weapon-icon">
+                    <i class="fas fa-crosshairs"></i>
+                </div>
+                <div class="reward-content">
+                    <h3 id="weaponRewardLabel">Carbine Rifle</h3>
+                    <p>Premium weapon with ammo</p>
+                    <button class="claim-btn" data-reward="weapon">
+                        <i class="fas fa-gift"></i> Claim Reward
+                    </button>
+                    <div class="claimed-badge hidden">
+                        <i class="fas fa-check"></i> Claimed
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Reward -->
+            <div class="vip-reward-card" data-reward="vehicle">
+                <div class="reward-icon vehicle-icon">
+                    <i class="fas fa-car"></i>
+                </div>
+                <div class="reward-content">
+                    <h3 id="vehicleRewardLabel">Adder Supercar</h3>
+                    <p>Exclusive vehicle for your garage</p>
+                    <button class="claim-btn" data-reward="vehicle">
+                        <i class="fas fa-gift"></i> Claim Reward
+                    </button>
+                    <div class="claimed-badge hidden">
+                        <i class="fas fa-check"></i> Claimed
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="vip-footer">
+            <p><i class="fas fa-info-circle"></i> Each reward can only be claimed once per month</p>
+        </div>
+    </div>
+</div>
