@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESX Job Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="hidden">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-content">
+                    <h1><i class="fas fa-briefcase"></i> Job Manager</h1>
+                    <p>Manage Jobs Easily from In-Game!</p>
+                </div>
+                <button id="closeBtn" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Navigation -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="dashboard">
+                    <i class="fas fa-chart-dashboard"></i> Dashboard
+                </button>
+                <button class="nav-tab" data-tab="jobs">
+                    <i class="fas fa-briefcase"></i> Jobs
+                </button>
+                <button class="nav-tab" data-tab="create">
+                    <i class="fas fa-plus"></i> Create Job
+                </button>
+                <button class="nav-tab" data-tab="statistics">
+                    <i class="fas fa-chart-bar"></i> Statistics
+                </button>
+            </div>
+
+            <!-- Content Areas -->
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalJobs">0</h3>
+                            <p>Total Jobs</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon active">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="activeJobs">0</h3>
+                            <p>Active Jobs</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon inactive">
+                            <i class="fas fa-pause"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="inactiveJobs">0</h3>
+                            <p>Inactive Jobs</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon completed">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalCompletions">0</h3>
+                            <p>Total Completions</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-paint-brush"></i>
+                        </div>
+                        <h3>Modern UI for editing jobs</h3>
+                        <p>Intuitive interface for managing all job aspects</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Statistics of all jobs/players</h3>
+                        <p>Comprehensive analytics and performance tracking</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Community to submit jobs</h3>
+                        <p>Allow community contributions and submissions</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <h3>Install new jobs with just one click</h3>
+                        <p>Easy job installation and deployment system</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jobs Tab -->
+            <div id="jobs" class="tab-content">
+                <div class="jobs-header">
+                    <h2>Existing Jobs</h2>
+                    <div class="jobs-actions">
+                        <input type="text" id="jobSearch" placeholder="Search jobs..." class="search-input">
+                        <select id="categoryFilter" class="filter-select">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="jobsList" class="jobs-grid">
+                    <!-- Jobs will be populated here -->
+                </div>
+            </div>
+
+            <!-- Create Job Tab -->
+            <div id="create" class="tab-content">
+                <div class="form-container">
+                    <h2>Create New Job</h2>
+                    <form id="createJobForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="jobName">Job Name*</label>
+                                <input type="text" id="jobName" name="job_name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="jobLabel">Job Label*</label>
+                                <input type="text" id="jobLabel" name="job_label" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="jobDescription">Description</label>
+                            <textarea id="jobDescription" name="description" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="jobCategory">Category</label>
+                                <select id="jobCategory" name="category">
+                                    <!-- Categories will be populated here -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="jobPayment">Payment ($)</label>
+                                <input type="number" id="jobPayment" name="payment" min="0" value="500">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="requiredLevel">Required Level</label>
+                                <input type="number" id="requiredLevel" name="required_level" min="1" value="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="maxPlayers">Max Players</label>
+                                <input type="number" id="maxPlayers" name="max_players" min="1" value="4">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="blipSprite">Blip Sprite</label>
+                                <input type="number" id="blipSprite" name="blip_sprite" value="280">
+                            </div>
+                            <div class="form-group">
+                                <label for="blipColor">Blip Color</label>
+                                <input type="number" id="blipColor" name="blip_color" value="2">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cooldown">Cooldown (seconds)</label>
+                            <input type="number" id="cooldown" name="cooldown" min="0" value="300">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear</button>
+                            <button type="submit" class="btn btn-primary">Create Job</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Statistics Tab -->
+            <div id="statistics" class="tab-content">
+                <div class="stats-container">
+                    <h2>Detailed Statistics</h2>
+                    <div class="stats-cards">
+                        <div class="stats-card">
+                            <h3>Job Performance</h3>
+                            <div class="performance-stats">
+                                <div class="perf-item">
+                                    <span>Most Popular Category:</span>
+                                    <span id="popularCategory">-</span>
+                                </div>
+                                <div class="perf-item">
+                                    <span>Average Payment:</span>
+                                    <span id="avgPayment">$0</span>
+                                </div>
+                                <div class="perf-item">
+                                    <span>Total Revenue:</span>
+                                    <span id="totalRevenue">$0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Job Modal -->
+    <div id="editModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Job</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="editJobForm">
+                <input type="hidden" id="editJobId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editJobLabel">Job Label*</label>
+                        <input type="text" id="editJobLabel" name="job_label" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editJobCategory">Category</label>
+                        <select id="editJobCategory" name="category"></select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="editJobDescription">Description</label>
+                    <textarea id="editJobDescription" name="description" rows="3"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editJobPayment">Payment ($)</label>
+                        <input type="number" id="editJobPayment" name="payment" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="editRequiredLevel">Required Level</label>
+                        <input type="number" id="editRequiredLevel" name="required_level" min="1">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
