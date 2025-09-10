@@ -664,3 +664,284 @@ body {
         grid-template-columns: 1fr 1fr;
     }
 }
+
+/* VIP MENU STYLES */
+.vip-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.vip-menu {
+    width: 90vw;
+    max-width: 800px;
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(30, 30, 60, 0.98) 100%);
+    border-radius: 25px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+    position: relative;
+}
+
+.vip-menu::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, #FF6B35, #FF1B8E, #FF6B35);
+    border-radius: 25px;
+    padding: 2px;
+    z-index: -1;
+}
+
+.vip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 27, 142, 0.1) 100%);
+    border-bottom: 1px solid rgba(255, 107, 53, 0.2);
+}
+
+.vip-logo {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.palm-tree-logo {
+    width: 60px;
+    height: 60px;
+    filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.5));
+}
+
+.vip-title h1 {
+    font-size: 2.2rem;
+    background: linear-gradient(45deg, #FF6B35, #FF1B8E);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    text-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+}
+
+.vip-title p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.vip-close-btn {
+    background: linear-gradient(45deg, rgba(244, 67, 54, 0.2), rgba(233, 30, 99, 0.2));
+    border: 2px solid #f44336;
+    color: #f44336;
+    padding: 12px 16px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.vip-close-btn:hover {
+    background: linear-gradient(45deg, #f44336, #e91e63);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(244, 67, 54, 0.4);
+}
+
+.vip-rewards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+}
+
+.vip-reward-card {
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 27, 142, 0.05) 100%);
+    border: 1px solid rgba(255, 107, 53, 0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.vip-reward-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.6s ease;
+    opacity: 0;
+}
+
+.vip-reward-card:hover::before {
+    opacity: 1;
+    transform: rotate(45deg) translate(50%, 50%);
+}
+
+.vip-reward-card:hover {
+    transform: translateY(-10px);
+    border-color: #FF6B35;
+    box-shadow: 0 15px 40px rgba(255, 107, 53, 0.3);
+}
+
+.reward-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.money-icon {
+    background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+}
+
+.weapon-icon {
+    background: linear-gradient(45deg, #f44336, #e91e63);
+    box-shadow: 0 8px 25px rgba(244, 67, 54, 0.3);
+}
+
+.vehicle-icon {
+    background: linear-gradient(45deg, #2196F3, #21CBF3);
+    box-shadow: 0 8px 25px rgba(33, 150, 243, 0.3);
+}
+
+.reward-content h3 {
+    color: #FF6B35;
+    font-size: 1.4rem;
+    margin-bottom: 0.8rem;
+    font-weight: bold;
+}
+
+.reward-content p {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.claim-btn {
+    background: linear-gradient(45deg, #FF6B35, #FF1B8E);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: center;
+}
+
+.claim-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+    background: linear-gradient(45deg, #FF8C5A, #FF4BA8);
+}
+
+.claim-btn:active {
+    transform: translateY(0);
+}
+
+.claimed-badge {
+    background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 15px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.vip-reward-card.claimed {
+    opacity: 0.7;
+    border-color: #4CAF50;
+}
+
+.vip-reward-card.claimed .claim-btn {
+    display: none;
+}
+
+.vip-reward-card.claimed .claimed-badge {
+    display: inline-flex;
+}
+
+.vip-footer {
+    text-align: center;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid rgba(255, 107, 53, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.vip-footer p {
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.vip-footer i {
+    color: #FF6B35;
+}
+
+/* VIP Responsive */
+@media (max-width: 768px) {
+    .vip-menu {
+        width: 95vw;
+        margin: 1rem;
+    }
+    
+    .vip-header {
+        padding: 1.5rem;
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .vip-logo {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .vip-rewards-grid {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+        gap: 1.5rem;
+    }
+    
+    .vip-title h1 {
+        font-size: 1.8rem;
+    }
+}

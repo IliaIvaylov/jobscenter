@@ -397,3 +397,174 @@ function closeMenu() {
     console.log('Closing menu from JavaScript...');
     sendNUICallback('closeMenu');
 }
+
+// VIP MENU SYSTEM
+
+let vipData = null;
+
+// Initialize VIP event listeners
+function initializeVipEventListeners() {
+    console.log('Setting up VIP event listeners...');
+    
+    // VIP close button
+    const vipCloseBtn = document.getElementById('closeVipBtn');
+    if (vipCloseBtn) {
+        vipCloseBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('VIP close button clicked');
+            closeVipMenu();
+        });
+    }
+    
+    // Claim reward buttons
+    document.querySelectorAll('.claim-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const rewardType = this.dataset.reward;
+            console.log('Claim reward clicked:', rewardType);
+            claimReward(rewardType);
+        });
+    });
+    
+    // ESC key listener for VIP menu
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const vipApp = document.getElementById('vipApp');
+            if (vipApp && !vipApp.classList.contains('hidden')) {
+                console.log('ESC key pressed - closing VIP menu');
+                closeVipMenu();
+            }
+        }
+    });
+}
+
+// Call this on DOM load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing...');
+    initializeEventListeners();
+    initializeVipEventListeners();
+});
+
+// NUI message handlers
+window.addEventListener('message', function(event) {
+    const data = event.data;
+    console.log('Received message:', data);
+    
+    switch (data.action) {
+        case 'openMenu':
+            openMenu();
+            break;
+        case 'closeMenu':
+            hideMenu();
+            break;
+        case 'receiveData':
+            currentData = data.data;
+            populateUI(data.data);
+            break;
+        case 'openVipMenu':
+            openVipMenu();
+            break;
+        case 'closeVipMenu':
+            hideVipMenu();
+            break;
+        case 'receiveVipData':
+            vipData = data.data;
+            populateVipUI(data.data);
+            break;
+        case 'rewardClaimed':
+            handleRewardClaimed(data.rewardType);
+            break;
+        default:
+            console.log('Unknown action:', data.action);
+    }
+});
+
+// Open VIP menu
+function openVipMenu() {
+    console.log('Opening VIP menu...');
+    const vipApp = document.getElementById('vipApp');
+    if (vipApp) {
+        vipApp.classList.remove('hidden');
+    }
+}
+
+// Hide VIP menu
+function hideVipMenu() {
+    console.log('Hiding VIP menu...');
+    const vipApp = document.getElementById('vipApp');
+    if (vipApp) {
+        vipApp.classList.add('hidden');
+    }
+}
+
+// Close VIP menu
+function closeVipMenu() {
+    console.log('Closing VIP menu from JavaScript...');
+    sendNUICallback('closeVipMenu');
+}
+
+// Populate VIP UI with data
+function populateVipUI(data) {
+    console.log('Populating VIP UI with data:', data);
+    
+    if (!data) return;
+    
+    // Update reward labels
+    if (data.rewards) {
+        if (data.rewards.money) {
+            const moneyLabel = document.getElementById('moneyRewardLabel');
+            if (moneyLabel) moneyLabel.textContent = data.rewards.money.label;
+        }
+        
+        if (data.rewards.weapon) {
+            const weaponLabel = document.getElementById('weaponRewardLabel');
+            if (weaponLabel) weaponLabel.textContent = data.rewards.weapon.label;
+        }
+        
+        if (data.rewards.vehicle) {
+            const vehicleLabel = document.getElementById('vehicleRewardLabel');
+            if (vehicleLabel) vehicleLabel.textContent = data.rewards.vehicle.label;
+        }
+    }
+    
+    // Update claimed status
+    if (data.claimed) {
+        Object.keys(data.claimed).forEach(rewardType => {
+            const card = document.querySelector(`[data-reward="${rewardType}"]`);
+            if (card) {
+                if (data.claimed[rewardType]) {
+                    card.classList.add('claimed');
+                    const claimedBadge = card.querySelector('.claimed-badge');
+                    if (claimedBadge) claimedBadge.classList.remove('hidden');
+                } else {
+                    card.classList.remove('claimed');
+                    const claimedBadge = card.querySelector('.claimed-badge');
+                    if (claimedBadge) claimedBadge.classList.add('hidden');
+                }
+            }
+        });
+    }
+}
+
+// Claim reward
+function claimReward(rewardType) {
+    console.log('Claiming reward:', rewardType);
+    sendNUICallback('claimReward', { rewardType: rewardType });
+}
+
+// Handle reward claimed
+function handleRewardClaimed(rewardType) {
+    console.log('Reward claimed:', rewardType);
+    
+    const card = document.querySelector(`[data-reward="${rewardType}"]`);
+    if (card) {
+        card.classList.add('claimed');
+        const claimedBadge = card.querySelector('.claimed-badge');
+        if (claimedBadge) claimedBadge.classList.remove('hidden');
+    }
+    
+    // Update vipData if it exists
+    if (vipData && vipData.claimed) {
+        vipData.claimed[rewardType] = true;
+    }
+}

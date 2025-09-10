@@ -31,3 +31,26 @@ CREATE TABLE IF NOT EXISTS `custom_job_stats` (
     PRIMARY KEY (`id`),
     FOREIGN KEY (`job_id`) REFERENCES `custom_jobs`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- VIP Menu System Tables
+CREATE TABLE IF NOT EXISTS `vip_players` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `identifier` varchar(50) NOT NULL,
+    `is_vip` tinyint(1) DEFAULT 1,
+    `granted_by` varchar(50) DEFAULT NULL,
+    `granted_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+    `expires_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `identifier` (`identifier`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `vip_claims` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `identifier` varchar(50) NOT NULL,
+    `reward_type` varchar(20) NOT NULL, -- 'weapon', 'vehicle', 'money'
+    `reward_data` text DEFAULT NULL,
+    `claimed_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unique_claim` (`identifier`, `reward_type`),
+    KEY `identifier` (`identifier`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

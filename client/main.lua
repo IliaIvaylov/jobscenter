@@ -1,6 +1,19 @@
 ESX = exports["es_extended"]:getSharedObject()
 
+-- Framework Detection
+local QBCore = nil
+local Framework = 'ESX'
+
+-- Try to detect QBCore
+pcall(function()
+    QBCore = exports['qb-core']:GetCoreObject()
+    if QBCore then
+        Framework = 'QBCore'
+    end
+end)
+
 local isMenuOpen = false
+local isVipMenuOpen = false
 
 -- Open job manager menu
 RegisterNetEvent('esx-job-manager:openMenu', function()
@@ -130,5 +143,109 @@ end, false)
 RegisterCommand('resetfocus', function()
     SetNuiFocus(false, false)
     isMenuOpen = false
+    isVipMenuOpen = false
     SendNUIMessage({ action = 'closeMenu' })
+    SendNUIMessage({ action = 'closeVipMenu' })
 end, false)
+
+-- VIP MENU SYSTEM
+
+-- Show notification function
+function ShowNotification(message, type)
+    if Framework == 'ESX' then
+        if type == 'error' then
+            ESX.ShowNotification('~r~' .. message)
+        elseif type == 'success' then
+            ESX.ShowNotification('~g~' .. message)
+        else
+            ESX.ShowNotification('~b~' .. message)
+        end
+    elseif Framework == 'QBCore' then
+        QBCore.Functions.Notify(message, type)
+    end
+end
+
+-- Open VIP menu
+RegisterNetEvent('vip-menu:openMenu', function()
+    if isVipMenuOpen then return end
+    
+    isVipMenuOpen = true
+    SetNuiFocus(true, true)
+    SendNUIMessage({
+        action = 'openVipMenu'
+    })
+    
+    -- Request VIP data from server
+    TriggerServerEvent('vip-menu:requestData')
+end)
+
+-- Receive VIP data from server
+RegisterNetEvent('vip-menu:receiveData', function(data)
+    SendNUIMessage({
+        action = 'receiveVipData',
+        data = data
+    })
+end)
+
+-- Handle reward claimed
+RegisterNetEvent('vip-menu:rewardClaimed', function(rewardType)
+    SendNUIMessage({
+        action = 'rewardClaimed',
+        rewardType = rewardType
+    })
+end)
+
+-- Show notification from server
+RegisterNetEvent('vip-menu:showNotification', function(message, type)
+    ShowNotification(message, type or 'info')
+end)
+
+-- Close VIP menu function
+function CloseVipMenu()
+    if not isVipMenuOpen then return end
+    
+    isVipMenuOpen = false
+    
+    SendNUIMessage({
+        action = 'closeVipMenu'
+    })
+    
+    SetNuiFocus(false, false)
+end
+
+-- VIP Menu NUI Callbacks
+RegisterNUICallback('closeVipMenu', function(data, cb)
+    CloseVipMenu()
+    if cb then cb('ok') end
+end)
+
+RegisterNUICallback('claimReward', function(data, cb)
+    TriggerServerEvent('vip-menu:claimReward', data.rewardType)
+    if cb then cb('ok') end
+end)
+
+-- VIP Menu Command
+RegisterCommand(VipConfig.Commands.openMenu, function()
+    TriggerEvent('vip-menu:openMenu')
+end, false)
+
+-- ESC Key Handler for VIP Menu
+CreateThread(function()
+    while true do
+        Wait(0)
+        if isVipMenuOpen then
+            DisableControlAction(0, 1, true)
+            DisableControlAction(0, 2, true)
+            DisableControlAction(0, 24, true)
+            DisableControlAction(0, 257, true)
+            DisableControlAction(0, 25, true)
+            DisableControlAction(0, 263, true)
+            
+            if IsControlJustPressed(0, 322) then
+                CloseVipMenu()
+            end
+        else
+            Wait(500)
+        end
+    end
+end)
